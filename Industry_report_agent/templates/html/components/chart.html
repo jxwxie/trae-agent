@@ -1,0 +1,32 @@
+<!-- Chart Component Template -->
+<script>
+function initChart(chartId, options) {
+    const chart = echarts.init(document.getElementById(chartId));
+    const defaultTheme = {
+        color: {{ config.chartConfig.theme.colorPalette[0]|tojson }},
+        backgroundColor: {{ config.theme.colors.background.secondary|tojson }},
+        textStyle: {
+            fontFamily: {{ config.theme.typography.fontFamily.body|tojson }}
+        }
+    };
+    // Merge default theme with custom options
+    const mergedOptions = {
+        ...defaultTheme,
+        ...options,
+        animation: true,
+        animationDuration: {{ config.chartConfig.theme.animation.duration }},
+        animationEasing: '{{ config.chartConfig.theme.animation.easing }}'
+    };
+    chart.setOption(mergedOptions);
+    window.addEventListener('resize', () => {
+        chart.resize();
+    });
+    return chart;
+}
+</script>
+<template id="chart-template">
+    <div class="chart-container bg-white rounded-lg p-6 mb-4" style="background: {{ config.theme.colors.background.secondary }};">
+        <div class="chart" style="width: 100%; height: 400px;"></div>
+        <div class="data-source text-sm text-gray-500 mt-2"></div>
+    </div>
+</template>

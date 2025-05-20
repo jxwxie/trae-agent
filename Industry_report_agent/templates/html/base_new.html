@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="{{ report.summary }}">
+  <title>{{ report.title }} - 行业分析报告</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.3.0/dist/tailwind.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/vue@3.3.0/dist/vue.global.prod.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+  <link rel="stylesheet" href="../styles/report-base.css">
+  <style>
+    :root {
+      color-scheme: light dark;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg-primary: #1a1a1a;
+        --bg-secondary: #2d2d2d;
+        --text-primary: #ffffff;
+        --text-secondary: #cccccc;
+      }
+    }
+    .preview-section {
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border-color);
+      padding: var(--spacing-2xl) var(--spacing-lg);
+      margin-bottom: var(--spacing-xl);
+    }
+    .preview-card {
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-md);
+      backdrop-filter: blur(10px);
+      transition: var(--transition-smooth);
+      border: 1px solid rgba(0,0,0,0.05);
+      padding: var(--spacing-lg);
+    }
+    .preview-card:hover {
+      box-shadow: var(--shadow-hover);
+      transform: translateY(-4px);
+      border-color: var(--primary-light);
+    }
+    .preview-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: var(--gradient-primary);
+      opacity: 0;
+      transition: var(--transition-base);
+    }
+    .preview-card:hover::before {
+      opacity: 1;
+    }
+    @media (prefers-color-scheme: dark) {
+      .preview-card {
+        background: rgba(45, 45, 45, 0.8);
+      }
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-gray-50 dark:bg-gray-900" style="font-family: var(--font-family-body); line-height: var(--line-height-normal);">
+  <div id="app">
+    <!-- Preview Section -->
+    <section class="preview-section text-dense-layout">
+      <div class="container mx-auto max-w-7xl">
+        <div class="preview-card p-6">
+          <div class="flex flex-col md:flex-row items-center justify-between mb-6">
+            <div>
+              <h1 class="text-[var(--font-size-h1)] font-[var(--font-weight-bold)] text-[var(--primary-color)] mb-2 font-[var(--font-family-title)] leading-[var(--line-height-tight)]">{{ report.title }}</h1>
+              <p class="text-[var(--text-secondary)] text-[var(--font-size-base)]">{{ report.date }} | {{ report.analyst }}</p>
+            </div>
+            <img v-if="report.logo" :src="report.logo" alt="企业LOGO" class="h-12 w-auto mt-4 md:mt-0 transition-transform duration-300 hover:scale-105">
+          </div>
+          
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="lg:col-span-2 space-y-4">
+              <div class="prose dark:prose-invert max-w-none">
+                <p class="text-lg leading-relaxed" v-html="report.summary"></p>
+              </div>
+              <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+                <h3 class="text-lg font-semibold mb-3">关键要点</h3>
+                <ul class="space-y-2">
+                  <li v-for="(highlight, idx) in report.highlights" :key="idx" 
+                      class="flex items-start">
+                    <span class="text-[#2a5caa] mr-2">•</span>
+                    <span class="text-gray-700 dark:text-gray-300">{{ highlight }}</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+            
+            <div class="lg:col-span-1">
+              <div v-for="(chart, idx) in report.previewCharts" :key="idx" 
+                   class="bg-white dark:bg-gray-800 rounded-lg p-4 mb-4 shadow-sm">
+                <div :id="'preview-chart-' + idx" class="h-48 w-full"></div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="flex justify-end mt-6">
+            <button @click="scrollToFullReport" 
+                    class="bg-[#2a5caa] hover:bg-[#1e407c] text-white px-6 py-2 rounded-lg 
+                           transition-all duration-300 transform hover:scale-105">
+              查看完整报告
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Navigation -->
+    <navigation :sections="report.sections" />
+    
+    <!-- Main Content -->
+    <main class="container mx-auto max-w-7xl px-4 py-8" style="max-width: var(--layout-text-width); margin: 0 auto;">
+      <!-- 根据内容类型选择布局模式 -->
+      <div class="layout-switcher" style="display: none;">
+        <button class="text-dense-layout-btn">文字密集型布局</button>
+        <button class="chart-dominant-layout-btn">图表主导型布局</button>
+        <button class="mixed-layout-btn">混合型布局</button>
+      </div>
+      <section-component v-for="section in report.sections" :key="section.id" :section="section" />
+    </main>
+  </div>
+
+  <script>
+    const { createApp, onMounted, nextTick } = Vue;
+    
+    const app = createApp({
+      data() {
+        return {
+          report: window.__REPORT_DATA__
+        };
+      },
+      methods: {
+        scrollToFullReport() {
+          const mainContent = document.querySelector('main');
+          if (mainContent) {
+            mainContent.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        },
+        initCharts() {
+          if (this.report.previewCharts && this.report.previewCharts.length) {
+            this.report.previewCharts.forEach((chart, idx) => {
+              nextTick(() => {
+                const dom = document.getElementById('preview-chart-' + idx);
+                if (dom && chart.option) {
+                  const instance = echarts.init(dom);
+                  instance.setOption(chart.option);
+                  window.addEventListener('resize', () => instance.resize());
+                }
+              });
+            });
+          }
+        }
+      },
+      mounted() {
+        this.initCharts();
+      }
+    });
+
+    app.component('navigation', {
+      template: '#navigation-template',
+      props: ['sections']
+    });
+
+    app.component('section-component', {
+      template: '#section-template',
+      props: ['section']
+    });
+
+    app.mount('#app');
+  </script>
+</body>
+</html>

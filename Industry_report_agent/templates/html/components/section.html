@@ -1,0 +1,31 @@
+<!-- Section Component Template -->
+<section id="{{ section.id }}" class="data-card mb-8" :class="[section.layoutType || 'text-dense-layout']" style="font-family: var(--font-family-body); background: var(--bg-secondary);">
+    <!-- 布局类型选择器 -->
+    <div class="layout-type-selector mb-4" v-if="section.allowLayoutSwitch">
+        <select v-model="section.layoutType" class="px-3 py-2 rounded border">
+            <option value="text-dense-layout">文字密集型布局</option>
+            <option value="chart-dominant-layout">图表主导型布局</option>
+            <option value="mixed-layout">混合型布局</option>
+        </select>
+    </div>
+    <div class="data-card-header">
+        <h2 class="text-[var(--font-size-h2)] font-[var(--font-weight-bold)]" style="font-family: var(--font-family-title); color: var(--primary-color);">{{ section.title }}</h2>
+    </div>
+    {% for subsection in section.subsections %}
+    <div id="{{ subsection.id }}" class="mt-8" :class="{'mixed-layout': section.layoutType === 'mixed-layout'}">
+        <h3 class="text-[var(--font-size-h3)] font-[var(--font-weight-semibold)] mb-4" style="color: var(--secondary-color);">{{ subsection.title }}</h3>
+        <div class="prose max-w-none mb-8" style="line-height: var(--line-height-relaxed); font-size: var(--font-size-base); color: var(--text-primary);">
+            {{ subsection.content | safe }}
+        </div>
+        {% if subsection.charts %}
+        {% for chart in subsection.charts %}
+        <div class="chart-container mb-8" :class="{'chart-dominant-layout': section.layoutType === 'chart-dominant-layout'}">
+            <div class="chart-title text-[var(--font-size-lg)] font-[var(--font-weight-semibold)] mb-6 text-center" style="color: var(--text-primary);">{{ chart.title }}</div>
+            <div id="{{ chart.id }}" class="chart w-full" style="height: clamp(300px, 50vh, 500px);"></div>
+            <div class="data-source text-[var(--font-size-sm)] mt-4 text-center" style="color: var(--text-muted);">数据来源：{{ chart.dataSource }}</div>
+        </div>
+        {% endfor %}
+        {% endif %}
+    </div>
+    {% endfor %}
+</section>

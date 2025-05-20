@@ -1,0 +1,216 @@
+{
+  "sourceStrategy": {
+    "preferredOrder": ["api", "web", "database", "file"],
+    "fallbackEnabled": true,
+    "qualityThreshold": 0.8,
+    "crossValidation": true
+  },
+  "apiSources": [
+    {
+      "name": "东方财富网API",
+      "type": "api",
+      "endpoint": "https://api.eastmoney.com/",
+      "authType": "apiKey",
+      "refreshInterval": "daily",
+      "retryStrategy": {
+        "maxRetries": 3,
+        "retryDelay": 1000
+      }
+    },
+    {
+      "name": "艾瑞咨询API",
+      "type": "api",
+      "endpoint": "https://api.iresearch.cn/",
+      "authType": "oauth2",
+      "refreshInterval": "weekly"
+    },
+    {
+      "name": "艾媒咨询API",
+      "type": "api",
+      "endpoint": "https://api.iimedia.cn/",
+      "authType": "apiKey",
+      "refreshInterval": "weekly"
+    },
+    {
+      "name": "Statista API",
+      "type": "api",
+      "endpoint": "https://api.statista.com/",
+      "authType": "oauth2",
+      "refreshInterval": "daily"
+    }
+  ],
+  "webSources": [
+    {
+      "name": "东方财富网数据",
+      "type": "crawler",
+      "urls": ["https://data.eastmoney.com/report/", "https://data.eastmoney.com/cjsj/"],
+      "selectors": {
+        "title": ".article-title",
+        "content": ".article-content",
+        "date": ".publish-date",
+        "data": ".data-value"
+      },
+      "updateFrequency": "daily"
+    },
+    {
+      "name": "知乎行业话题",
+      "type": "crawler",
+      "urls": ["https://www.zhihu.com/topic/"],
+      "selectors": {
+        "title": ".QuestionHeader-title",
+        "content": ".RichContent-inner",
+        "author": ".AuthorInfo-name",
+        "votes": ".VoteButton-count",
+        "date": ".ContentItem-time"
+      },
+      "updateFrequency": "daily",
+      "qualityControl": {
+        "minVotes": 100,
+        "minWordCount": 500
+      }
+    },
+    {
+      "name": "国家统计局",
+      "type": "crawler",
+      "urls": ["https://www.stats.gov.cn/sj/"],
+      "selectors": {
+        "title": ".cont_tit",
+        "content": ".TRS_Editor",
+        "date": ".cont_tit3 span",
+        "data": ".center"
+      },
+      "updateFrequency": "monthly",
+      "dataTypes": ["economic", "demographic", "industry"]
+    },
+    {
+      "name": "上海证券交易所",
+      "type": "crawler",
+      "urls": ["http://www.sse.com.cn/disclosure/listedinfo/"],
+      "selectors": {
+        "title": ".title",
+        "content": ".content",
+        "date": ".date",
+        "code": ".code"
+      },
+      "fileTypes": ["pdf", "doc"],
+      "updateFrequency": "daily"
+    },
+    {
+      "name": "深圳证券交易所",
+      "type": "crawler",
+      "urls": ["http://www.szse.cn/disclosure/listed/"],
+      "selectors": {
+        "title": ".title",
+        "content": ".content",
+        "date": ".date",
+        "code": ".code"
+      },
+      "fileTypes": ["pdf", "doc"],
+      "updateFrequency": "daily"
+    },
+    {
+      "name": "36氪",
+      "type": "crawler",
+      "urls": ["https://36kr.com/information/technology", "https://36kr.com/information/enterprise"],
+      "selectors": {
+        "title": ".article-title",
+        "content": ".article-content",
+        "date": ".article-time"
+      },
+      "updateFrequency": "hourly"
+    },
+    {
+      "name": "天眼查企业数据",
+      "type": "crawler",
+      "urls": ["https://www.tianyancha.com/"],
+      "selectors": {
+        "companyName": ".company-name",
+        "regCapital": ".reg-capital",
+        "foundDate": ".found-date",
+        "businessScope": ".business-scope"
+      },
+      "updateFrequency": "weekly"
+    },
+    {
+      "name": "中国产业信息网",
+      "type": "crawler",
+      "urls": ["https://www.chyxx.com/industry/"],
+      "selectors": {
+        "title": ".article-title",
+        "content": ".article-content",
+        "date": ".article-date",
+        "category": ".category-name"
+      },
+      "updateFrequency": "daily"
+    },
+    {
+      "name": "Mob研究院报告",
+      "type": "crawler",
+      "urls": ["https://www.mob.com/mobdata/report"],
+      "fileTypes": ["pdf"],
+      "updateFrequency": "weekly"
+    },
+    {
+      "name": "Google Trends",
+      "type": "crawler",
+      "urls": ["https://trends.google.com/trends/"],
+      "selectors": {
+        "trend": ".trend-data",
+        "period": ".time-period",
+        "value": ".trend-value"
+      },
+      "updateFrequency": "daily"
+    }
+  ],
+  "databaseSources": [
+    {
+      "name": "市场数据库",
+      "type": "sql",
+      "connection": {
+        "host": "localhost",
+        "port": 5432,
+        "database": "market_data"
+      },
+      "tables": ["market_size", "company_info", "financial_data"]
+    }
+  ],
+  "dataValidation": {
+    "enableValidation": true,
+    "rules": {
+      "numericFields": ["value", "growth", "regCapital"],
+      "dateFields": ["date", "publish_date", "foundDate"],
+      "requiredFields": ["title", "content", "companyName"]
+    },
+    "qualityMetrics": {
+      "completeness": 0.9,
+      "accuracy": 0.95,
+      "timeliness": 0.85,
+      "consistency": 0.9
+    },
+    "crossValidationRules": [
+      {
+        "fields": ["market_size", "growth_rate"],
+        "tolerance": 0.1,
+        "minSources": 2
+      },
+      {
+        "fields": ["company_revenue", "market_share"],
+        "tolerance": 0.15,
+        "minSources": 2
+      }
+    ],
+    "dataEnrichment": {
+      "enabled": true,
+      "methods": [
+        "historical_comparison",
+        "industry_average",
+        "trend_analysis"
+      ]
+    }
+  },
+  "cacheConfig": {
+    "enabled": true,
+    "ttl": 3600,
+    "storage": "redis"
+  }
+}

@@ -1,0 +1,28 @@
+<!-- Navigation Component Template -->
+<nav class="data-card mb-8" style="font-family: var(--font-family-body); background: var(--bg-secondary);">
+    <div class="data-card-header">
+        <h2 class="text-[var(--font-size-h2)] font-[var(--font-weight-bold)]" style="color: var(--primary-color); font-family: var(--font-family-title);">目录</h2>
+    </div>
+    <ul class="space-y-2 py-2">
+        {% for section in report.sections %}
+        <li class="group">
+            <a href="#{{ section.id }}" class="flex items-center py-2 px-3 rounded-md transition-all duration-300 hover:bg-[var(--bg-tertiary)]" style="color: var(--text-primary);">
+                <span class="mr-2 text-[var(--primary-color)]">{{ loop.index }}.</span>
+                <span class="font-[var(--font-weight-medium)] group-hover:text-[var(--primary-color)]">{{ section.title }}</span>
+            </a>
+            {% if section.subsections %}
+            <ul class="ml-6 mt-1 space-y-1 border-l-2 border-[var(--bg-tertiary)]">
+                {% for subsection in section.subsections %}
+                <li>
+                    <a href="#{{ subsection.id }}" class="flex items-center py-1 px-3 rounded transition-all duration-300 hover:bg-[var(--bg-tertiary)]" style="color: var(--text-secondary);">
+                        <span class="mr-2 opacity-60">{{ loop.parent.loop.index }}.{{ loop.index }}</span>
+                        <span class="text-[var(--font-size-sm)] hover:text-[var(--primary-color)]">{{ subsection.title }}</span>
+                    </a>
+                </li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+        </li>
+        {% endfor %}
+    </ul>
+</nav>
