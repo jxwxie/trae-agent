@@ -28,7 +28,6 @@ Thumbs.db
 tmp/
 temp/
 
-
 # Reports output
 Reports/
 uploads/
@@ -39,3 +38,8 @@ uploads/
 
 # Test coverage
 coverage/
+
+# Sample reports and guidance
+Guidence/
+Sample reports/
+Industry_report_agent/Docker部署Trae行业分析报告智能体操作指南.pdf
